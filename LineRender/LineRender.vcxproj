@@ -69,13 +69,21 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(SolutionDir)depend\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)depend\lib\Debug;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>freeglut.lib;glew32.lib;armadillo.lib;pthreadVC2.lib;pthreadVCE2.lib;pthreadVSE2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -111,6 +119,35 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Control.h" />
+    <ClInclude Include="FileTools.h" />
+    <ClInclude Include="Line.h" />
+    <ClInclude Include="MinSolve.h" />
+    <ClInclude Include="PreCompile.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="SimpleTools.h" />
+    <ClInclude Include="SquareMatrix.h" />
+    <ClInclude Include="Tech.h" />
+    <ClInclude Include="ThreadTools.h" />
+    <ClInclude Include="TimeTool.h" />
+    <ClInclude Include="TransMatrix.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Control.cpp" />
+    <ClCompile Include="FileTools.cpp" />
+    <ClCompile Include="Line.cpp" />
+    <ClCompile Include="LineTech.cpp" />
+    <ClCompile Include="LineTech.h" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MinSolve.cpp" />
+    <ClCompile Include="PreCompile.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Tech.cpp" />
+    <ClCompile Include="ThreadTools.cpp" />
+    <ClCompile Include="TimeTool.cpp" />
+    <ClCompile Include="TransMatrix.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
