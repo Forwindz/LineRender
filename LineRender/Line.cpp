@@ -1,5 +1,5 @@
 #include "Line.h"
-
+/*
 void Shape::LineStrip::Init(
 	Line & _line, 
 	float _width, 
@@ -10,7 +10,7 @@ void Shape::LineStrip::Init(
 	//提前计算，不使用曲面shader
 	std::vector<LineVertices> d;
 	std::vector<unsigned int> indices;
-	glm::vec3 temp,pre;
+	glm::vec3 temp,pre,linev;
 	float w = -0.5f;
 	size = _line.size();
 	d.reserve(size<<1);
@@ -20,17 +20,21 @@ void Shape::LineStrip::Init(
 
 	for (int i = 0; i < size-1; ++i)
 	{
-		temp = (glm::normalize(glm::cross(_baseDir, _line[i+1].pos - _line[i].pos))+pre)*0.5f;
-		d.push_back({ _line[i].pos + temp * (_width*0.5f),_line[i].color, w+=1.0f});
-		d.push_back({_line[i].pos - temp*(_width*0.5f), _line[i].color, w});
+		linev = _line[i + 1].pos - _line[i].pos;
+		temp = (glm::normalize(glm::cross(_baseDir,linev))+pre)*0.5f;
+		linev = glm::normalize(glm::cross(linev, temp));
+		d.push_back({ _line[i].pos + temp * (_width*0.5f),_line[i].color, w+=1.0f, linev});
+		d.push_back({_line[i].pos - temp*(_width*0.5f), _line[i].color, w,linev});
 		indices.push_back((i << 1));
 		indices.push_back((i << 1)+1);
 		pre = temp;
 	}
 
-	temp= glm::normalize(glm::cross(_baseDir, _line[size-1].pos - _line[size-2].pos));
-	d.push_back({ _line[size - 1].pos + temp * (_width*0.5f),_line[size-1].color, w += 1.0f });
-	d.push_back({ _line[size - 1].pos - temp * (_width*0.5f),_line[size - 1].color, w += 1.0f });
+	linev = _line[size - 1].pos - _line[size - 2].pos;
+	temp= glm::normalize(glm::cross(_baseDir, linev));
+	linev = glm::normalize(glm::cross(linev, temp));
+	d.push_back({ _line[size - 1].pos + temp * (_width*0.5f),_line[size-1].color, w += 1.0f ,linev});
+	d.push_back({ _line[size - 1].pos - temp * (_width*0.5f),_line[size - 1].color, w += 1.0f,linev });
 	indices.push_back(((size-1) << 1));
 	indices.push_back(((size-1) << 1) + 1);
 	size <<= 1;
@@ -38,15 +42,17 @@ void Shape::LineStrip::Init(
 	BindData(sizeof(glm::vec3)*(size), d.data(),
 		sizeof(unsigned int)*(size), indices.data());
 
-}
+}*/
 
-void Shape::LineStrip::Init(std::vector<Line*> lines, float _width, glm::vec3 _baseDir, int totalSeg)
+void Shape::LineStrip::Init(
+	const std::vector<LineBasicData*> lines, 
+	float _width, glm::vec3 _baseDir, int totalSeg)
 {
 	//提前计算，不使用曲面shader
 
 	std::vector<LineVertices> d;
 	std::vector<unsigned int> indices;
-	glm::vec3 temp, pre;
+	glm::vec3 temp, pre, linev;
 	float w = -0.5f;
 	size = 0;
 	indiceSize = 0;
@@ -69,7 +75,7 @@ void Shape::LineStrip::Init(std::vector<Line*> lines, float _width, glm::vec3 _b
 	i = -1;
 	for (unsigned int k = 0; k < lines.size(); k++)
 	{
-		Line& lptr = *lines[k];
+		LineBasicData& lptr = *lines[k];
 		unsigned int jl = 0;
 
 		pre = glm::normalize(glm::cross(_baseDir, lptr[1].pos - lptr[0].pos));
@@ -77,18 +83,22 @@ void Shape::LineStrip::Init(std::vector<Line*> lines, float _width, glm::vec3 _b
 		for (jl = 0; jl < lptr.size() - 1; jl++)
 		{
 			++i;
-			temp = (glm::normalize(glm::cross(_baseDir, lptr[jl + 1].pos - lptr[jl].pos)) + pre)*0.5f;
-			d.push_back({ lptr[jl].pos + temp * (_width*0.5f),lptr[jl].color, w += wStep });
-			d.push_back({ lptr[jl].pos - temp * (_width*0.5f), lptr[jl].color, w });
+			linev = lptr[jl + 1].pos - lptr[jl].pos;
+			temp = (glm::normalize(glm::cross(_baseDir, linev)) + pre)*0.5f;
+			linev = glm::normalize(glm::cross(linev, temp));
+			d.push_back({ lptr[jl].pos + temp * (_width*0.5f),lptr[jl].color, w += wStep ,linev});
+			d.push_back({ lptr[jl].pos - temp * (_width*0.5f), lptr[jl].color, w ,linev});
 			indices.push_back((i << 1));
 			indices.push_back((i << 1) + 1);
 			pre = temp;
 		}
 		++i;
+		linev = lptr[jl].pos - lptr[jl - 1].pos;
 		temp = glm::normalize(glm::cross(_baseDir, lptr[jl].pos - lptr[jl - 1].pos));
 		//segment's w set to xxx.5f
-		d.push_back({ lptr[jl].pos + temp * (_width*0.5f),lptr[jl].color, w = (int)(w + wStep + 0.5f) + 0.5f });
-		d.push_back({ lptr[jl].pos - temp * (_width*0.5f),lptr[jl].color, w });
+		w = (int)(w + wStep + 0.5f) + 0.5f;
+		d.push_back({ lptr[jl].pos + temp * (_width*0.5f),lptr[jl].color, w,linev });
+		d.push_back({ lptr[jl].pos - temp * (_width*0.5f),lptr[jl].color, w,linev });
 		indices.push_back((i << 1));
 		indices.push_back((i << 1) + 1);
 
@@ -126,7 +136,7 @@ void Shape::LineStrip::Render()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertices), 0);//pos
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertices), (void*)sizeof(glm::vec3));//color
 	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(LineVertices), (void*)(sizeof(glm::vec3)*2));//w
-	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(LineVertices), (void*)(sizeof(glm::vec3)*2+sizeof(float)));//a
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(LineVertices), (void*)(sizeof(glm::vec3)*2+sizeof(float)));//n
 	
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesData);
 	if (!breakLine)
@@ -152,11 +162,14 @@ int Shape::LineStrip::GetSize() const
 	return size;
 }
 
-void Shape::RandomGenerateLine(Line & line, const glm::vec3 begin, const float curve, const unsigned int count)
+void Shape::RandomGenerateLine(LineBasicData & line, 
+	const glm::vec3 begin, 
+	const float curve, 
+	const unsigned int count)
 {
 	line.clear();
 	line.reserve(count);
-	line.push_back({ begin,glm::vec3(0.5f,0.5f,0.0f),0.0f,0.0f });
+	line.push_back({ begin,glm::vec3(0.5f,0.5f,0.0f)});
 
 	glm::vec3 a;
 	glm::vec3 p(1.0f, 0.0f, 0.0f);
@@ -166,7 +179,32 @@ void Shape::RandomGenerateLine(Line & line, const glm::vec3 begin, const float c
 	{
 		a = glm::normalize(cross(dir,p)+glm::normalize(glm::vec3(RandFloat() ,RandFloat() ,RandFloat()))*curve);
 		dir += a;
-		line.push_back({ line[i-1].pos + dir ,dir,0.0f,0.0f});
+		//colorful line // grey line
+		line.push_back({ line[i-1].pos + dir ,/*dir*0.2f+*/glm::vec3(0.8f,0.8f,0.8f)});
+	}
+}
+
+void Shape::RandomGenerateLineStra(LineBasicData & line, const glm::vec3 begin, const float curve, const unsigned int count)
+{
+	line.clear();
+	line.reserve(count);
+	line.push_back({ begin,glm::vec3(0.5f,0.5f,0.0f) });
+
+	glm::vec3 a;
+	glm::vec3 p(1.0f, 0.0f, 0.0f);
+	glm::vec3 dir(RandFloat(), RandFloat(), RandFloat());
+	dir = glm::normalize(dir)*0.05f;
+	for (unsigned int i = 1; i < count; i++)
+	{
+		/*
+		a = glm::normalize(cross(dir, p))*0.05f + 0.001f*glm::normalize(glm::vec3(RandFloat(), RandFloat(), RandFloat()))*curve;
+		dir += a;
+		//colorful line // grey line
+		line.push_back({ line[i - 1].pos + dir ,dir*0.2f+glm::vec3(0.8f,0.8f,0.8f) });*/
+		a = glm::normalize(cross(dir, p) + glm::normalize(glm::vec3(RandFloat(), RandFloat(), RandFloat()))*curve);
+		dir += a;
+		//colorful line // grey line
+		line.push_back({ line[i - 1].pos + dir ,dir*0.5f+glm::vec3(0.5f,0.5f,0.5f) });
 	}
 }
 
@@ -175,27 +213,34 @@ void Shape::RandomGenerateLineStrip(
 	const glm::vec3 dir, const float curve, 
 	const unsigned int count, const unsigned int groupCount, const int segNum)
 {
-	std::vector<Line*> line;
+	std::vector<LineBasicData*> line;
 	std::vector<float> g;
 
 	line.reserve(groupCount);
 	g.reserve(segNum);
 
-	for (unsigned int i = 0; i < groupCount; ++i)
+	
+	for (unsigned int i = 0; i < 4; ++i)
 	{
-		line.push_back(new Line());
+		line.push_back(new LineBasicData());
+		RandomGenerateLineStra(*(line.back()), dir, curve, count);
+	}
+	for (unsigned int i = 4; i < groupCount; ++i)
+	{
+		line.push_back(new LineBasicData());
 		RandomGenerateLine(*(line.back()), 
-			dir//+ glm::normalize(glm::vec3(RandFloat(), RandFloat(), RandFloat()))*10.0f
+			dir//+ glm::normalize(glm::vec3(RandFloat(), RandFloat(), RandFloat()))*50.0f
 			, curve, count);
 	}
 
-	ls.Init(line, 3.5f, glm::vec3(0.0f, 0.5f, 0.5f), segNum);
+	ls.Init(line, 10.5f, glm::vec3(0.0f, 0.5f, 0.5f), segNum);
 
 	//float gChangeRate = 0.01f;
 	//float gChangeDir = 1.0f;
 	//float gCurrent = 0.0f;
 	//const glm::vec3 pos(50.0f, 50.0f, 100.0f);
 	/*
+	const glm::vec3 pos(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < segNum; ++i)
 	{
 		
@@ -208,18 +253,19 @@ void Shape::RandomGenerateLineStrip(
 			else
 				g.push_back(0.1f);
 	}*/
-	for (unsigned int i = 0; i < segNum / groupCount; i++)
+	
+	for (unsigned int i = 0; i < segNum / groupCount*4; i++)
 	{
-		g.push_back(0.99f);
+		g.push_back(0.9f);
 	}
 
-	for (int i = segNum / groupCount; i < segNum; i++)
+	for (int i = segNum / groupCount* 4; i < segNum; i++)
 	{
 		g.push_back(0.05f);
 	}
 	/*
 	int start = rand() % (segNum / 2 - 5);
-	int end = start + 100;
+	int end = start + 1000;
 	if (end > segNum)end = segNum;
 	for (int i = 0; i < start; ++i)
 	{
@@ -234,6 +280,8 @@ void Shape::RandomGenerateLineStrip(
 		g.push_back(0.2f);
 	}*/
 	/*
+	float gCurrent = 0.0f;
+	float gChangeRate = 0.01f;
 	for (int i = 0; i < segNum; ++i)
 	{
 		gCurrent += gChangeRate;
@@ -243,6 +291,13 @@ void Shape::RandomGenerateLineStrip(
 		}
 		g.push_back(gCurrent);
 	}*/
+	/*
+	for (int i = 0; i < segNum; ++i)
+	{
+		g.push_back(0.5f);
+	}*/
+
+
 
 	ls.g = g;
 

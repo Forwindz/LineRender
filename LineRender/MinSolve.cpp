@@ -9,7 +9,7 @@ void Render::ComputeMin::Init(const int _size)
 	cen.set_size(_size);
 	temp.set_size(_size);
 	h = arma::fmat(_size, _size);
-	ans.fill(0.5f);
+	ans.fill(1.0f);
 	needGetH = true;
 	computeDone = false;
 	//强制转换函数指针
@@ -47,27 +47,36 @@ void Render::ComputeMin::Compute(
 	cen[0] -= 0.5f*pfe.s;
 	cen[size-1] -= 0.5f*pfe.s;
 	//compute cen
-	
+#pragma omp parallel for
 	for (int i = 0; i < size; ++i)
 	{
 		temp[i] = pow(1 - _g[i], pfe.l);
+		temp[i] *= temp[i];
 	}
 
-	//cost a lot of time computing this thing...
+#pragma omp parallel for
 	for (int i = 0; i < size; ++i)
 	{
 		for (int j = 0; j < size; ++j)
 		{
-			cen[i] += temp[i] * (h.at(i, j)*_g[j] * pfe.q + h.at(j, i)*_g[j] * pfe.r);
+			float t1 = h.at(i, j)*_g[j] ;
+			float t2 = h.at(j, i)*_g[j];
+			t1 *= t1;
+			t2 *= t2;
+			cen[i] += temp[i] * (t1* pfe.q + t2 * pfe.r);
 		}
 	}
 #ifdef DEBUG
-	printf("compute basic data done\n");
+	printf(">Compute basic data: done\n");
 #endif
 }
 
 void Render::ComputeMin::CallThreadCompute(const std::vector<int>* bp, const std::vector<float>* g,const bool _needUpdateH)
 {
+	if (thread.isRunning())return;
+#ifdef DEBUG
+	printf("-- call thread to compute --\n");
+#endif
 	_bp = bp;
 	_g = g;
 	needGetH = false;
@@ -88,30 +97,28 @@ float * Render::ComputeMin::GetAns()
 
 void Render::ComputeMin::process()
 {
-	const float stepSize = 0.15f;
-	const float condition = stepSize*0.001f;
-	float change=0.0f;
+	const float stepSize = 0.1f;
+	const float condition = 0.001f;
 	float changed = 0.0f;
 	do
 	{
 		//compute dx
-		change = 0;
+		//cen*x(i)^2+side*x(i)*x(i+1)-2 p x(i)
+		lastC = changed;
+		changed = 0.0f;
 		for (int i = 1; i < size - 1; ++i)
 		{
-			temp[i] = 2 * ans[i] * cen[i] + side[i] * (ans[i + 1] + ans[i - 1]) - pfe.p;
-			change += abs(temp[i]);
+			temp[i] = 2 * ans[i] * cen[i] + side[i] * (ans[i + 1] + ans[i-1]) - pfe.p*2;
+			changed += abs(temp[i]);
 		}
 		temp[0] = 2 * ans[0] * cen[0] + side[0] * (ans[1]) - pfe.p;
 		temp[size - 1] = 2 * ans[size - 1] * cen[size - 1] + side[size - 1] * (ans[size - 2]) - pfe.p;
-		//change += abs(temp[0] + temp[size - 1]);
-		
-
 		
 		//begin to change
-		float t;
+#pragma omp parallel for
 		for (int i = 0; i < size; ++i)
 		{
-			t = ans[i];
+			float t = ans[i];
 			ans[i] -= temp[i] * stepSize;
 			if (ans[i] < 0|| ans[i] > 1)
 			{
@@ -119,30 +126,15 @@ void Render::ComputeMin::process()
 				int temp_int = (int)(ans[i] * 0.5f);
 				ans[i] = abs(ans[i] - temp_int * 2.0f - 1.0f);
 			}
-			changed = (t - ans[i])*(t - ans[i]);
 		}
-		std::cout << ">>\t" << change << " || \t"
-			<< abs(lastC - change) << "\t @" << condition << std::endl;
-		changed = change - lastC;
-		lastC = change;
-		if (abs(changed) <= condition)break;
-	} while (1);
-	/*
-	std::cout << "\n\n=====================\n\n";
-	for (int i = 0; i < size/25; ++i)
-	{
-		std::cout << ans[i] << "\t";
-		if (i % 8 == 0)std::cout << "\n";
-	}
-	int co = 0;
-	for (int i = 0; i < size; ++i)
-	{
-		if (abs(ans[i]-0.5f)<=0.2f)++co;
-	}
-	std::cout << "\n>>>co="<<co << "\n";
-	system("pause");*/
 #ifdef DEBUG
-	printf("down done\n");
+std::cout << ">>\t" << "" << " || \t"
+			<< abs(lastC - changed) << "\t "<<changed<<" @" << condition << std::endl;
+#endif // DEBUG
+		
+	} while (abs(changed-lastC) > condition);
+#ifdef DEBUG
+	printf("> Compute: done\n");
 #endif
 	computeDone = true;
 }
@@ -151,11 +143,14 @@ void Render::ComputeMin::threadMethod()
 {
 	while (1)
 	{
-		//printf("thread> Inner\n");
 		thread.InnerCheck();
-		//printf("thread> Compute\n");
+		ti.Begin();
 		if (needUpdateH)Compute(*_bp, *_g);
 		process();
+		ti.End();
+#ifdef DEBUG
+		printf("> cost %d ms\n", ti.GetIntervalMs());
+#endif
 		thread.Suspend();
 	}
 }

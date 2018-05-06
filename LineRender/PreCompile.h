@@ -50,7 +50,7 @@ static const glm::vec3 BLACK(0.0f, 0.0f, 0.0f);
 	#define PAUSE_SHOW_ERROR {exit(1);}
 #endif
 
-#define RandFloat() (rand()/double(RAND_MAX)-0.5) 
+#define RandFloat() ((float)(rand()/double(RAND_MAX)-0.5))
 
 
 static const int SCREEN_HEIGHT = 1000;

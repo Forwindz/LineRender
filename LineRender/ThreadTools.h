@@ -12,6 +12,7 @@ namespace Tool
 		void Suspend();
 		void Resume();
 		void InnerCheck();
+		bool isRunning();
 		pthread_t th;
 	private:
 		pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;

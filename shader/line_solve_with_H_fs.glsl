@@ -8,6 +8,8 @@ layout(binding = 0, r32ui) uniform uimage2D head_pointer_image;
 layout(binding = 1, rgba32ui) uniform uimageBuffer list_buffer;
 // H Matrix
 layout(binding = 2, r8) uniform image2D mh;
+//store alpha information
+layout(binding = 3, r8) uniform imageBuffer alphaList;
 
 // This is the output color
 layout(location = 0) out vec4 color;
@@ -59,15 +61,6 @@ void main(void)
 		}
 
 	}
-	//store
-	if (fragment_count > 1)
-	{
-		for (i = 0; i < fragment_count; i++)
-		{
-			imageStore(list_buffer,int(frag_index_list[i]),fragment_list[i]);
-		}
-	}
-
 	//compute H
 	uint innerPos;
 	float iw;
@@ -82,7 +75,7 @@ void main(void)
 		for (uint iii = 0; iii < fragment_count - 1; iii++)
 		{
 			iw=uintBitsToFloat(fragment_list[iii].w);
-			i=uint(floor(iw+0.5));
+			i=uint(iw+0.5f);
 			for (uint jjj = iii + 1; jjj < fragment_count; jjj++)
 			{
 				jw=uintBitsToFloat(fragment_list[jjj].w);
@@ -104,20 +97,22 @@ void main(void)
 		}
 	}
 
+	vec4 final_color;
 	//final color
-	vec4 final_color = vec4(0.0);
-/*
-	for (i = 0; i < fragment_count; i++)
+	for (int i = 0; i < fragment_count; i++)
 	{
+		float iw,delta;
+		int pos;
+		float alpha;
+		float data1,data2;
+		iw=uintBitsToFloat(fragment_list[i].w);
+		pos=int(iw);
+		delta=iw-pos;
+		data1=imageLoad(alphaList,pos).x;
+		data2=imageLoad(alphaList,pos+1).x;
+		alpha=data2*delta+data1*(1-delta);
 		vec4 modulator = unpackUnorm4x8(fragment_list[i].y);
-		
-		final_color = modulator;
-	}*/
-	final_color=vec4(0.0f,
-	0.8f,
-	0.0f,
-	0.0f);
-	color = final_color;
-
-	// color = vec4(float(fragment_count) / float(MAX_FRAGMENTS));
+		final_color = mix(final_color, modulator, alpha);
+	}
+	color=final_color;
 }

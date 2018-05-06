@@ -2,13 +2,14 @@
 #include "LineTech.h"
 #include "Control.h"
 #include "TimeTool.h"
-
+#include "Light.h"
 Shape::LineStrip lineStrip;
 Render::Camera camera(glm::vec3(600, 0, 100), 0, 130.0f,
 	(float)SCREEN_WIDTH / (float)SCREEN_HEIGHT,
-	10000.0f, 0.1f, 150.0f);
+	5000.0f, 1.0f, 150.0f);
 Input::MouseControl mouse;
 Tool::FPSCalculator fps;
+Render::LightComponent light;
 
 Render::LineTech lineTech;
 
@@ -20,7 +21,8 @@ static void RenderScenceCB()
 
 	//camera.horizontalDeg += 0.001f;
 	camera.Recomp();
-	lineTech.Render(lineStrip, camera);
+	//light.UpdateData();
+	lineTech.Render(lineStrip, camera,light);
 
 	glFlush();
 	glutSwapBuffers();
@@ -68,18 +70,30 @@ int main(int argc, char ** argv)
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glDisable(GL_PRIMITIVE_RESTART);
 
+#ifndef _OPENMP
+	fprintf(stderr, "OpenMP not supported");
+#endif
+
 	lineTech.Init();
 	lineTech.Enable();
 	//camera.horizontalDeg = 1.0f;
 	camera.Init(lineTech.GetProgram());
 	CheckOpenGLError("LineTech init end");
 	//generate data
-	Shape::RandomGenerateLineStrip(lineStrip, glm::vec3(1.0f, 0.5f, 0.1f), 0.1f, 500, 200, 5000);
+	Shape::RandomGenerateLineStrip(lineStrip, glm::vec3(1.0f, 0.5f, 0.1f), 0.1f, 500, 60, 3000);
 	CheckOpenGLError("Line generate");
-	lineTech.Prepare(lineStrip, {1.0f,0.3f,0.06f,1.0f,2.5f});
+	lineTech.Prepare(lineStrip, {0.5f,0.3f,0.03f,0.5f,0.25f});
 	CheckOpenGLError("Line pre end");
 	mouse.Init(camera);
 	fps.Init();
+	
+	light.data.al.color = WHITE;
+	light.data.al.intensity = 0.4f;
+	light.data.dl.color = WHITE;
+	light.data.dl.direct = glm::normalize(glm::vec3(1.0f,0.5f,0.2f));
+	light.data.dl.intensity = 0.6f;
+	//memset(&(light.data), 255, sizeof(light.data));
+	light.Init(lineTech.GetProgram());
 	glutMainLoop();
 	return 0;
 }

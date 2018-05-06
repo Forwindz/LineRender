@@ -80,6 +80,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <AdditionalDependencies>freeglut.lib;glew32.lib;armadillo.lib;pthreadVC2.lib;pthreadVCE2.lib;pthreadVSE2.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -122,6 +123,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Control.h" />
     <ClInclude Include="FileTools.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="MinSolve.h" />
     <ClInclude Include="PreCompile.h" />
@@ -129,6 +131,7 @@
     <ClInclude Include="SimpleTools.h" />
     <ClInclude Include="SquareMatrix.h" />
     <ClInclude Include="Tech.h" />
+    <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="ThreadTools.h" />
     <ClInclude Include="TimeTool.h" />
     <ClInclude Include="TransMatrix.h" />
@@ -137,6 +140,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="FileTools.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="Line.cpp" />
     <ClCompile Include="LineTech.cpp" />
     <ClCompile Include="LineTech.h" />

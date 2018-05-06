@@ -2,6 +2,7 @@
 #include "PreCompile.h"
 #include "SimpleTools.h"
 #include "ThreadTools.h"
+#include "TimeTool.h"
 
 //This class is specificed for computing the alpha of segments
 namespace Render
@@ -60,6 +61,7 @@ namespace Render
 		void threadMethod();
 		
 		Tool::PThread thread;
+		Tool::TimeInterval ti;
 	};
 	
 }

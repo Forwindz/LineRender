@@ -24,9 +24,9 @@ Render::LineTech::~LineTech()
 	glDeleteBuffers(1, &uselessVBO);
 	glDeleteBuffers(1, &uselessIBO);
 
-	glDeleteProgram(solveProgram);
-	glDeleteProgram(renderProgram);
-	
+	glDeleteProgram(solveHProgram);
+	glDeleteProgram(solveNoHProgram);
+
 }
 
 bool Render::LineTech::Init()
@@ -35,9 +35,16 @@ bool Render::LineTech::Init()
 	program = Shader::CreateProgramSimple("shader/line_render_vs.glsl", "shader/line_render_fs.glsl");
 	wvpMatLoc = glGetUniformLocation(program, "gWVP");
 	worldMatLoc = glGetUniformLocation(program, "gWorld");
-	//shader for computing linked list and other things
-	solveProgram = Shader::CreateProgramSimple("shader/line_solve_vs.glsl", "shader/line_solve_fs.glsl");
-	renderProgram = Shader::CreateProgramSimple("shader/line_final_vs.glsl", "shader/line_final_fs.glsl");
+
+	solveHProgram = glCreateProgram();
+	solveNoHProgram = glCreateProgram();
+	GLuint sobjv = Shader::AddShaderFromFile(solveHProgram, "shader/line_solve_vs.glsl", GL_VERTEX_SHADER);
+	glAttachShader(solveNoHProgram, sobjv);
+	Shader::AddShaderFromFile(solveHProgram, "shader/line_solve_with_H_fs.glsl", GL_FRAGMENT_SHADER);
+	Shader::AddShaderFromFile(solveNoHProgram, "shader/line_solve_without_H_fs.glsl", GL_FRAGMENT_SHADER);
+
+	Shader::PrepareProgram(solveHProgram);
+	Shader::PrepareProgram(solveNoHProgram);
 
 	//OIT realize:
 	//Linked List head Texture:
@@ -50,25 +57,20 @@ bool Render::LineTech::Init()
 		0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindImageTexture(0, headTexture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
-	CheckOpenGLError("LineTech INIT 0");
 	//headClearBuffer
 	glGenBuffers(1, &headClearBuffer);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, headClearBuffer);
-	glBufferData(GL_PIXEL_UNPACK_BUFFER, 
+	glBufferData(GL_PIXEL_UNPACK_BUFFER,
 		MAX_FRAMEBUFFER_WIDTH*MAX_FRAMEBUFFER_HEIGHT * sizeof(GLuint), NULL, GL_STATIC_DRAW);
 	//clear buffer
 	GLuint* data = nullptr;
 	data = (GLuint*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
 	memset(data, 0x00, MAX_FRAMEBUFFER_WIDTH * MAX_FRAMEBUFFER_HEIGHT * sizeof(GLuint));
 	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-	CheckOpenGLError("LineTech INIT 1");
-	
-	CheckOpenGLError("LineTech INIT 2");
 	//atomic counter buffer
 	glGenBuffers(1, &atomCounterBuffer);
 	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, atomCounterBuffer);
 	glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), NULL, GL_DYNAMIC_COPY);
-	CheckOpenGLError("LineTech INIT 3");
 	// Create the linked list storage buffer
 	glGenBuffers(1, &linkedListBuffer);
 	glBindBuffer(GL_TEXTURE_BUFFER, linkedListBuffer);
@@ -79,10 +81,8 @@ bool Render::LineTech::Init()
 	glBindTexture(GL_TEXTURE_BUFFER, linkedListTexture);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32UI, linkedListBuffer);
 	glBindTexture(GL_TEXTURE_BUFFER, 0);
-	CheckOpenGLError("LineTech INIT 4");
 	glBindImageTexture(1, linkedListTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
-	
-	CheckOpenGLError("LineTech INIT 6");
+
 	//useless Vertices&Indices
 	glGenBuffers(1, &uselessVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, uselessVBO);
@@ -91,7 +91,7 @@ bool Render::LineTech::Init()
 	glGenBuffers(1, &uselessIBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, uselessIBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uselessIndices), uselessIndices, GL_STATIC_DRAW);
-	CheckOpenGLError("LineTech INIT 7");
+
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
 	glBindBuffer(GL_TEXTURE_BUFFER, 0);
@@ -105,19 +105,12 @@ bool Render::LineTech::Update()
 	return true;
 }
 
-void Render::LineTech::Render(Shape::LineStrip & line, Camera& camera)
+void Render::LineTech::Render(Shape::LineStrip & line, Camera& camera, LightComponent& lc)
 {
 	GLuint * data;
 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);/*
-#ifdef DEBUG
-	//打印atomic中的信息
-	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, atomCounterBuffer);
-	GLuint * cont = (GLuint*)glMapBuffer(GL_ATOMIC_COUNTER_BUFFER, GL_READ_ONLY);
-	char buffer[50];
-	sprintf_s(buffer, "texels: %d", cont[0]);
-	glUnmapBuffer(GL_ATOMIC_COUNTER_BUFFER);
-#endif*/
+	glDisable(GL_CULL_FACE);
+
 	//clear h
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, hClearBuffer);
 	glBindTexture(GL_TEXTURE_2D, matrixHBuffer);
@@ -134,7 +127,6 @@ void Render::LineTech::Render(Shape::LineStrip & line, Camera& camera)
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	CheckOpenGLError("Line Tech 1");
 	glBindImageTexture(0, headTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
 	glBindImageTexture(1, linkedListTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
 	glBindImageTexture(2, matrixHBuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R8);
@@ -143,28 +135,23 @@ void Render::LineTech::Render(Shape::LineStrip & line, Camera& camera)
 	//begin to render >>>
 
 	glUseProgram(program);
-	
+
 	//bind uniform data
 	glUniformMatrix4fv(wvpMatLoc, 1, GL_TRUE, (const GLfloat*)(&(camera.wvpMat)));
 	glUniformMatrix4fv(worldMatLoc, 1, GL_TRUE, (const GLfloat*)(&(camera.worldMat)));
-	line.Render();//first time to render, save all fragments
+	lc.UpdateData();
 	
-	glUseProgram(solveProgram);
-	DrawUseLess();
-	CheckOpenGLError("Line Tech 3");
-	//sort complete
-	if (computeAlpha.needGetH)
-	{
-		if (!camera.HasUpdated())
-		{
-			glBindTexture(GL_TEXTURE_2D, matrixHBuffer);
-			glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, (char*)computeAlpha.GetHMatrixPointer());
-		} 
-		computeAlpha.CallThreadCompute(&(line.gapRecord), &(line.g), camera.HasUpdated());
-	}
+	line.Render();//first time to render, save all fragments
 
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glUseProgram(renderProgram);
+	bool tneed;
+	if (tneed = camera.HasUpdated()&&computeAlpha.needGetH)
+	{
+		glUseProgram(solveHProgram);
+	}
+	else
+	{
+		glUseProgram(solveNoHProgram);
+	}
 
 	//transport data
 	if (computeAlpha.computeDone)
@@ -174,15 +161,17 @@ void Render::LineTech::Render(Shape::LineStrip & line, Camera& camera)
 		memcpy(alphaPointer, computeAlpha.GetAns(), sizeof(float)*segNum);
 		glUnmapBuffer(GL_TEXTURE_BUFFER);
 		computeAlpha.needGetH = true;
-		computeAlpha.computeDone= false;
+		computeAlpha.computeDone = false;
 	}
-	
-	
-	glEnable(GL_BLEND);
+
 	DrawUseLess();
-	glDisable(GL_BLEND);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	CheckOpenGLError("Line Tech 4");
+
+	if (tneed)
+	{
+		glBindTexture(GL_TEXTURE_2D, matrixHBuffer);
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, (char*)computeAlpha.GetHMatrixPointer());
+		computeAlpha.CallThreadCompute(&(line.gapRecord), &(line.g), tneed);
+	}
 }
 
 void Render::LineTech::Prepare(Shape::LineStrip & line, Render::ComputeMin::ParamForE pfe)
@@ -193,13 +182,12 @@ void Render::LineTech::Prepare(Shape::LineStrip & line, Render::ComputeMin::Para
 	glDeleteTextures(1, &alphaListTexture);
 	glGenBuffers(1, &alphaListBuffer);
 	glBindBuffer(GL_TEXTURE_BUFFER, alphaListBuffer);
-	glBufferData(GL_TEXTURE_BUFFER, line.segNum*sizeof(float), NULL, GL_DYNAMIC_COPY);
+	glBufferData(GL_TEXTURE_BUFFER, line.segNum * sizeof(float), NULL, GL_DYNAMIC_COPY);
 	glBindBuffer(GL_TEXTURE_BUFFER, 0);
 	glGenTextures(1, &alphaListTexture);
 	glBindTexture(GL_TEXTURE_BUFFER, alphaListTexture);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R8, alphaListBuffer);
 	glBindTexture(GL_TEXTURE_BUFFER, 0);
-	CheckOpenGLError("LineTech Pre 1");
 
 	//h matrix clear
 	glDeleteBuffers(1, &hClearBuffer);

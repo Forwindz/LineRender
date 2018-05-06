@@ -7,8 +7,8 @@ layout(binding = 0, r32ui) uniform uimage2D head_pointer_image;
 // Buffer containing linked lists of fragments
 layout(binding = 1, rgba32ui) uniform uimageBuffer list_buffer;
 // H Matrix
-//layout(binding = 2, r8) uniform image2D mh;
-
+layout(binding = 2, r8) uniform image2D mh;
+//store alpha information
 layout(binding = 3, r8) uniform imageBuffer alphaList;
 
 // This is the output color
@@ -19,11 +19,10 @@ layout(location = 0) out vec4 color;
 
 // Temporary array used for sorting fragments
 uvec4 fragment_list[MAX_FRAGMENTS];
-//uint frag_index_list[MAX_FRAGMENTS];
+uint frag_index_list[MAX_FRAGMENTS];
 
 void main(void)
 {
-	
 	uint current_index;
 	uint fragment_count = 0;
 
@@ -33,13 +32,38 @@ void main(void)
 	{
 		uvec4 fragment = imageLoad(list_buffer, int(current_index));
 		fragment_list[fragment_count] = fragment;
+		frag_index_list[fragment_count] = current_index;
 		current_index = fragment.x;
 		fragment_count++;
 	}
-	//final color
-	vec4 final_color = vec4(0.0);
 
-	
+	uint i, j;
+	//sort far->near 0->n
+	if (fragment_count > 1)
+	{
+
+		for (i = 0; i < fragment_count - 1; i++)
+		{
+			for (j = 0; j < i; j++)
+			{
+				uvec4 fragment1 = fragment_list[i];
+				uvec4 fragment2 = fragment_list[j];
+
+				float depth1 = uintBitsToFloat(fragment1.z);
+				float depth2 = uintBitsToFloat(fragment2.z);
+
+				if (depth1 < depth2)
+				{
+					fragment_list[i] = fragment2;
+					fragment_list[j] = fragment1;
+				}
+			}
+		}
+
+	}
+
+	vec4 final_color;
+	//final color
 	for (int i = 0; i < fragment_count; i++)
 	{
 		float iw,delta;
@@ -52,13 +76,8 @@ void main(void)
 		data1=imageLoad(alphaList,pos).x;
 		data2=imageLoad(alphaList,pos+1).x;
 		alpha=data2*delta+data1*(1-delta);
-		//alpha=1.0f;
 		vec4 modulator = unpackUnorm4x8(fragment_list[i].y);
-		final_color = /*vec4(0.1f,0.1f,0.1f,1.0f)+*/mix(final_color, modulator, alpha);
-		final_color.a=1.0f;
+		final_color = mix(final_color, modulator, alpha);
 	}
-	//color = vec4(0.1f,0.8f,0.1f,1.0f);
-	color=final_color;//+vec4(0.1f,0.1f,0.1f,1.0f);
-
-	// color = vec4(float(fragment_count) / float(MAX_FRAGMENTS));
+	color =final_color; 
 }

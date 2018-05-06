@@ -38,3 +38,11 @@ void Tool::PThread::InnerCheck()
 	}
 	pthread_mutex_unlock(&mut);
 }
+
+bool Tool::PThread::isRunning()
+{
+	pthread_mutex_lock(&mut);
+	bool t= flag>0;
+	pthread_mutex_unlock(&mut);
+	return t;
+}

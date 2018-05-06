@@ -3,6 +3,7 @@
 #include "Line.h"
 #include "Camera.h"
 #include "MinSolve.h"
+#include "Light.h"
 
 namespace Render
 {
@@ -16,14 +17,14 @@ namespace Render
 		virtual ~LineTech();
 		virtual bool Init();
 		virtual bool Update();
-		void Render(Shape::LineStrip& line,Camera& camera);
-		void Prepare(Shape::LineStrip& line,Render::ComputeMin::ParamForE pfe);
+		void Render(Shape::LineStrip& line, Camera& camera, LightComponent& lc);
+		void Prepare(Shape::LineStrip& line, Render::ComputeMin::ParamForE pfe);
 	protected:
 		void DrawUseLess();
 		GLuint headTexture, linkedListTexture, alphaListTexture,
-			linkedListBuffer, atomCounterBuffer, matrixHBuffer,alphaListBuffer,
+			linkedListBuffer, atomCounterBuffer, matrixHBuffer, alphaListBuffer,
 			headClearBuffer, hClearBuffer,
-			solveProgram, renderProgram,
+			solveHProgram, solveNoHProgram,
 			uselessVBO, uselessIBO,
 			wvpMatLoc, worldMatLoc;
 		Render::ComputeMin computeAlpha;

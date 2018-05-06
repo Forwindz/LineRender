@@ -31,7 +31,7 @@ void Render::Camera::Init(GLuint ShaderProgram)
 	wvpMatLoc = glGetUniformLocation(ShaderProgram, "gWVP");
 	worldMatLoc = glGetUniformLocation(ShaderProgram, "gWorld");
 	hasUpdate = 0;
-	updateAvaliableTime = 60;
+	updateAvaliableTime = 20;
 }
 
 void Render::Camera::Recomp()
