@@ -82,7 +82,7 @@ int main(int argc, char ** argv)
 	//generate data
 	Shape::RandomGenerateLineStrip(lineStrip, glm::vec3(1.0f, 0.5f, 0.1f), 0.1f, 500, 60, 3000);
 	CheckOpenGLError("Line generate");
-	lineTech.Prepare(lineStrip, {0.5f,0.3f,0.03f,0.5f,0.25f});
+	lineTech.Prepare(lineStrip, {1.0f/2,0.6f/2,0.06f/2,1.0f/2,2.5f/2});
 	CheckOpenGLError("Line pre end");
 	mouse.Init(camera);
 	fps.Init();

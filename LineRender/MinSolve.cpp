@@ -127,10 +127,6 @@ void Render::ComputeMin::process()
 				ans[i] = abs(ans[i] - temp_int * 2.0f - 1.0f);
 			}
 		}
-#ifdef DEBUG
-std::cout << ">>\t" << "" << " || \t"
-			<< abs(lastC - changed) << "\t "<<changed<<" @" << condition << std::endl;
-#endif // DEBUG
 		
 	} while (abs(changed-lastC) > condition);
 #ifdef DEBUG
