@@ -7,9 +7,9 @@ layout(binding = 0, r32ui) uniform uimage2D head_pointer_image;
 // Buffer containing linked lists of fragments
 layout(binding = 1, rgba32ui) uniform uimageBuffer list_buffer;
 // H Matrix
-layout(binding = 2, r8) uniform image2D mh;
+layout(binding = 2, r32f) uniform image2D mh;
 //store alpha information
-layout(binding = 3, r8) uniform imageBuffer alphaList;
+layout(binding = 3, r32f) uniform imageBuffer alphaList;
 
 // This is the output color
 layout(location = 0) out vec4 color;
@@ -72,12 +72,12 @@ void main(void)
 		float data1,data2;
 		iw=uintBitsToFloat(fragment_list[i].w);
 		pos=int(iw);
-		delta=iw-pos;
 		data1=imageLoad(alphaList,pos).x;
 		data2=imageLoad(alphaList,pos+1).x;
-		alpha=data2*delta+data1*(1-delta);
+		alpha=data1*delta+data1*(1-delta);
 		vec4 modulator = unpackUnorm4x8(fragment_list[i].y);
 		final_color = mix(final_color, modulator, alpha);
+		//final_color=vec4(alpha);
 	}
 	color =final_color; 
 }

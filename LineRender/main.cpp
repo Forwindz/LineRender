@@ -80,9 +80,9 @@ int main(int argc, char ** argv)
 	camera.Init(lineTech.GetProgram());
 	CheckOpenGLError("LineTech init end");
 	//generate data
-	Shape::RandomGenerateLineStrip(lineStrip, glm::vec3(1.0f, 0.5f, 0.1f), 0.1f, 500, 60, 3000);
+	Shape::RandomGenerateLineStrip(lineStrip, glm::vec3(1.0f, 0.5f, 0.1f), 0.12f, 400, 20, 3000);
 	CheckOpenGLError("Line generate");
-	lineTech.Prepare(lineStrip, {1.0f/2,0.6f/2,0.06f/2,1.0f/2,2.5f/2});
+	lineTech.Prepare(lineStrip, {2.0f/2,0.6f/2,0.06f/2,1.0f/2,2.5f/2});
 	CheckOpenGLError("Line pre end");
 	mouse.Init(camera);
 	fps.Init();

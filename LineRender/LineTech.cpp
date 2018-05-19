@@ -129,8 +129,8 @@ void Render::LineTech::Render(Shape::LineStrip & line, Camera& camera, LightComp
 
 	glBindImageTexture(0, headTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
 	glBindImageTexture(1, linkedListTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
-	glBindImageTexture(2, matrixHBuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R8);
-	glBindImageTexture(3, alphaListTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R8);
+	glBindImageTexture(2, matrixHBuffer, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32F);
+	glBindImageTexture(3, alphaListTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
 
 	//begin to render >>>
 
@@ -186,7 +186,7 @@ void Render::LineTech::Prepare(Shape::LineStrip & line, Render::ComputeMin::Para
 	glBindBuffer(GL_TEXTURE_BUFFER, 0);
 	glGenTextures(1, &alphaListTexture);
 	glBindTexture(GL_TEXTURE_BUFFER, alphaListTexture);
-	glTexBuffer(GL_TEXTURE_BUFFER, GL_R8, alphaListBuffer);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, alphaListBuffer);
 	glBindTexture(GL_TEXTURE_BUFFER, 0);
 
 	//h matrix clear
@@ -206,7 +206,7 @@ void Render::LineTech::Prepare(Shape::LineStrip & line, Render::ComputeMin::Para
 	glBindTexture(GL_TEXTURE_2D, matrixHBuffer);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, segNum, segNum,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, segNum, segNum,
 		0, GL_RED, GL_FLOAT, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 

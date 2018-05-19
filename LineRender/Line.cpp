@@ -186,26 +186,42 @@ void Shape::RandomGenerateLine(LineBasicData & line,
 
 void Shape::RandomGenerateLineStra(LineBasicData & line, const glm::vec3 begin, const float curve, const unsigned int count)
 {
+	
 	line.clear();
 	line.reserve(count);
-	line.push_back({ begin,glm::vec3(0.5f,0.5f,0.0f) });
+	
+	line.push_back({ begin+150.0f,glm::vec3(0.5f,0.5f,0.0f) });
+
+	glm::vec3 a,dis;
+	glm::vec3 p(1.0f, 0.0f, 0.0f);
+	glm::vec3 dir(RandFloat(), RandFloat(), RandFloat());
+	dir = glm::normalize(dir)*10.0f;
+	for (unsigned int i = 1; i < count; i++)
+	{
+		dis = begin - line[i - 1].pos+120.0f;
+		float r = glm::length(dis)/10.0f;
+		r = -1000.1f / (r*r+100.0f);
+		a = glm::normalize(glm::normalize(-dis) + curve*glm::cross(glm::normalize(dis),glm::normalize(glm::vec3(RandFloat(), RandFloat(), RandFloat()))))*r;
+		dir += a;
+		//printf("%d\tdir=  %f\n", i,dir);
+		//colorful line // grey line
+		line.push_back({ line[i - 1].pos + dir ,dir*0.0f+2.0f*glm::vec3(0.5f,0.5f,0.5f) });
+	}/*
+	line.clear();
+	line.reserve(count);
+	line.push_back({ begin+100.0f,glm::vec3(0.5f,0.5f,0.0f) });
 
 	glm::vec3 a;
 	glm::vec3 p(1.0f, 0.0f, 0.0f);
 	glm::vec3 dir(RandFloat(), RandFloat(), RandFloat());
-	dir = glm::normalize(dir)*0.05f;
+	dir = glm::normalize(dir)*0.0001f;
 	for (unsigned int i = 1; i < count; i++)
 	{
-		/*
-		a = glm::normalize(cross(dir, p))*0.05f + 0.001f*glm::normalize(glm::vec3(RandFloat(), RandFloat(), RandFloat()))*curve;
+		a = glm::normalize(cross(dir, p) + glm::normalize(glm::vec3(RandFloat(), RandFloat(), RandFloat()))*curve)*0.1f;
 		dir += a;
 		//colorful line // grey line
-		line.push_back({ line[i - 1].pos + dir ,dir*0.2f+glm::vec3(0.8f,0.8f,0.8f) });*/
-		a = glm::normalize(cross(dir, p) + glm::normalize(glm::vec3(RandFloat(), RandFloat(), RandFloat()))*curve);
-		dir += a;
-		//colorful line // grey line
-		line.push_back({ line[i - 1].pos + dir ,dir*0.5f+glm::vec3(0.5f,0.5f,0.5f) });
-	}
+		line.push_back({ line[i - 1].pos + dir ,dir*0.2f+glm::vec3(0.8f,0.8f,0.8f) });
+	}*/
 }
 
 void Shape::RandomGenerateLineStrip(
@@ -220,12 +236,12 @@ void Shape::RandomGenerateLineStrip(
 	g.reserve(segNum);
 
 	
-	for (unsigned int i = 0; i < 4; ++i)
+	for (unsigned int i = 0; i < 1; ++i)
 	{
 		line.push_back(new LineBasicData());
 		RandomGenerateLineStra(*(line.back()), dir, curve, count);
 	}
-	for (unsigned int i = 4; i < groupCount; ++i)
+	for (unsigned int i = 1; i < groupCount; ++i)
 	{
 		line.push_back(new LineBasicData());
 		RandomGenerateLine(*(line.back()), 
@@ -233,7 +249,7 @@ void Shape::RandomGenerateLineStrip(
 			, curve, count);
 	}
 
-	ls.Init(line, 10.5f, glm::vec3(0.0f, 0.5f, 0.5f), segNum);
+	ls.Init(line, 10.0f, glm::vec3(0.0f, 0.5f, 0.5f), segNum);
 
 	//float gChangeRate = 0.01f;
 	//float gChangeDir = 1.0f;
@@ -254,12 +270,12 @@ void Shape::RandomGenerateLineStrip(
 				g.push_back(0.1f);
 	}*/
 	
-	for (unsigned int i = 0; i < segNum / groupCount*4; i++)
+	for (unsigned int i = 0; i < segNum / groupCount*1; i++)
 	{
-		g.push_back(0.9f);
+		g.push_back(0.95f);
 	}
 
-	for (int i = segNum / groupCount* 4; i < segNum; i++)
+	for (int i = segNum / groupCount* 1; i < segNum; i++)
 	{
 		g.push_back(0.05f);
 	}

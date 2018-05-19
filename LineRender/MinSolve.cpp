@@ -9,7 +9,7 @@ void Render::ComputeMin::Init(const int _size)
 	cen.set_size(_size);
 	temp.set_size(_size);
 	h = arma::fmat(_size, _size);
-	ans.fill(1.0f);
+	ans.fill(0.5f);
 	needGetH = true;
 	computeDone = false;
 	//强制转换函数指针
@@ -97,9 +97,14 @@ float * Render::ComputeMin::GetAns()
 
 void Render::ComputeMin::process()
 {
-	const float stepSize = 0.1f;
+	float stepSize = 0.1f;
 	const float condition = 0.001f;
-	float changed = 0.0f;
+	float delta = 0.0f;
+	float changed = 0.0f;/*
+	for (int i = 0; i < size; i++)
+		ans[i] = 1.0f;
+	computeDone = true;
+	if(ans[2]>0.1f)return;*/
 	do
 	{
 		//compute dx
@@ -109,26 +114,36 @@ void Render::ComputeMin::process()
 		for (int i = 1; i < size - 1; ++i)
 		{
 			temp[i] = 2 * ans[i] * cen[i] + side[i] * (ans[i + 1] + ans[i-1]) - pfe.p*2;
-			changed += abs(temp[i]);
+			
 		}
 		temp[0] = 2 * ans[0] * cen[0] + side[0] * (ans[1]) - pfe.p;
 		temp[size - 1] = 2 * ans[size - 1] * cen[size - 1] + side[size - 1] * (ans[size - 2]) - pfe.p;
 		
 		//begin to change
-#pragma omp parallel for
+//#pragma omp parallel for
 		for (int i = 0; i < size; ++i)
 		{
 			float t = ans[i];
 			ans[i] -= temp[i] * stepSize;
 			if (ans[i] < 0|| ans[i] > 1)
 			{
-				ans[i] = 0.0f;
+				//ans[i] = 0.0f;
 				int temp_int = (int)(ans[i] * 0.5f);
-				ans[i] = abs(ans[i] - temp_int * 2.0f - 1.0f);
+				ans[i] -= temp_int * 2.0f;
+				if (ans[i] < 0)ans[i] += 2.0f;
+				if (ans[i] > 1.0f)ans[i] = 2.0f - ans[i];
+				
 			}
+			changed += (ans[i]-t)*(ans[i]-t);
+			//printf("%f\n", changed);
 		}
-		
-	} while (abs(changed-lastC) > condition);
+		//printf("ch=%f\tlch=%f\t >%f\t\n",changed,lastC,stepSize);
+		//std::cout << "ch=" << changed << std::endl;
+		//if (abs(changed - lastC)/(delta+1.0f) > 1.0f&&delta>0.01f)
+		//	stepSize = stepSize * ((delta+1.0f) / abs(changed - lastC));
+		if (changed >= lastC && lastC>=condition)
+			stepSize *= (lastC / changed)*0.99f;
+	} while ((delta=changed) > condition);
 #ifdef DEBUG
 	printf("> Compute: done\n");
 #endif

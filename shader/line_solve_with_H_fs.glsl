@@ -7,9 +7,9 @@ layout(binding = 0, r32ui) uniform uimage2D head_pointer_image;
 // Buffer containing linked lists of fragments
 layout(binding = 1, rgba32ui) uniform uimageBuffer list_buffer;
 // H Matrix
-layout(binding = 2, r8) uniform image2D mh;
+layout(binding = 2, r32f) uniform image2D mh;
 //store alpha information
-layout(binding = 3, r8) uniform imageBuffer alphaList;
+layout(binding = 3, r32f) uniform imageBuffer alphaList;
 
 // This is the output color
 layout(location = 0) out vec4 color;
