@@ -121,31 +121,35 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Clear1DTexture.h" />
     <ClInclude Include="Control.h" />
     <ClInclude Include="FileTools.h" />
+    <ClInclude Include="hugeVector.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Line.h" />
-    <ClInclude Include="MinSolve.h" />
+    <ClInclude Include="ListTexture.h" />
+    <ClInclude Include="Params.h" />
     <ClInclude Include="PreCompile.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SimpleTools.h" />
     <ClInclude Include="SquareMatrix.h" />
     <ClInclude Include="Tech.h" />
-    <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="ThreadTools.h" />
     <ClInclude Include="TimeTool.h" />
     <ClInclude Include="TransMatrix.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Clear1DTexture.cpp" />
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="FileTools.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Line.cpp" />
-    <ClCompile Include="LineTech.cpp" />
-    <ClCompile Include="LineTech.h" />
+    <ClCompile Include="LineStripTech.cpp" />
+    <ClCompile Include="LineStripTech.h" />
+    <ClCompile Include="ListTexture.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MinSolve.cpp" />
+    <ClCompile Include="Params.cpp" />
     <ClCompile Include="PreCompile.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Tech.cpp" />

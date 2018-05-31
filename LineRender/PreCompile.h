@@ -22,6 +22,8 @@
 #include <array>
 #include <map>
 
+#include <fstream>
+
 #include <iostream>
 
 #include <assimp\scene.h>
@@ -30,7 +32,8 @@
 
 #include <Magick++.h>
 
-#include <armadillo.h>
+#include <thread>
+//#include <armadillo.h>
 
 #ifdef WIN32
 	#define HAVE_STRUCT_TIMESPEC

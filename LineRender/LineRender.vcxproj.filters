@@ -39,9 +39,6 @@
     <ClInclude Include="Line.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="MinSolve.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="FileTools.h">
       <Filter>头文件\Tools</Filter>
     </ClInclude>
@@ -60,10 +57,19 @@
     <ClInclude Include="TimeTool.h">
       <Filter>头文件\Tools</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadPool.h">
+    <ClInclude Include="Light.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ListTexture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="hugeVector.h">
       <Filter>头文件\Tools</Filter>
     </ClInclude>
-    <ClInclude Include="Light.h">
+    <ClInclude Include="Params.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Clear1DTexture.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -86,16 +92,7 @@
     <ClCompile Include="Line.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="LineTech.h">
-      <Filter>头文件</Filter>
-    </ClCompile>
-    <ClCompile Include="LineTech.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="PreCompile.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="MinSolve.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="FileTools.cpp">
@@ -111,6 +108,21 @@
       <Filter>源文件\Tools</Filter>
     </ClCompile>
     <ClCompile Include="Light.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LineStripTech.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LineStripTech.h">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ListTexture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Params.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Clear1DTexture.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

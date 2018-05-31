@@ -1,10 +1,10 @@
 #include "PreCompile.h"
-#include "LineTech.h"
+#include "LineStripTech.h"
 #include "Control.h"
 #include "TimeTool.h"
 #include "Light.h"
 Shape::LineStrip lineStrip;
-Render::Camera camera(glm::vec3(600, 0, 100), 0, 130.0f,
+Render::Camera camera(glm::vec3(100, 0, 0), 0, 130.0f,
 	(float)SCREEN_WIDTH / (float)SCREEN_HEIGHT,
 	5000.0f, 1.0f, 150.0f);
 Input::MouseControl mouse;
@@ -12,6 +12,25 @@ Tool::FPSCalculator fps;
 Render::LightComponent light;
 
 Render::LineTech lineTech;
+
+
+
+static void getParams()
+{
+	while (1)
+	{
+		std::cout<<"Params pqrls:\n";
+		float p, q, r, s, l;
+		std::cin >> p >> q >> r >> l >> s;
+		if (p <= -0.01f)
+		{
+			printf("exit");
+			exit(0);
+		}
+		lineTech.setParams(p, q, r, l, s);
+		std::cout << ("-------\n");
+	}
+}
 
 static void RenderScenceCB()
 {
@@ -41,6 +60,19 @@ static void InitializeGlutCallbacks()
 	glutIdleFunc(RenderScenceCB);
 }
 
+static void PrepareData()
+{
+	std::cout << "Input file path= ";
+	std::string filePath;
+	std::cin >> filePath;
+	//std::string filePath = "F:\\projects\\vs2017\\LineRender\\data\\tornado.txt";
+	lineStrip.LoadFromFile(filePath,0.05f);
+	std::cout << "data generated.\n";
+	lineTech.Prepare(lineStrip, { 1.0f ,2000.0f/2.0f ,2000.0f/2.0f ,2.0f },20.0f);
+	std::cout << "prepared.\n";
+	CheckOpenGLError("prepare Data end");
+}
+
 int main(int argc, char ** argv)
 {
 	// ³õÊ¼»¯GLUT
@@ -67,7 +99,7 @@ int main(int argc, char ** argv)
 
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glDisable(GL_PRIMITIVE_RESTART);
 
 #ifndef _OPENMP
@@ -76,14 +108,15 @@ int main(int argc, char ** argv)
 
 	lineTech.Init();
 	lineTech.Enable();
-	//camera.horizontalDeg = 1.0f;
 	camera.Init(lineTech.GetProgram());
 	CheckOpenGLError("LineTech init end");
+	PrepareData();
 	//generate data
+	/*
 	Shape::RandomGenerateLineStrip(lineStrip, glm::vec3(1.0f, 0.5f, 0.1f), 0.12f, 400, 20, 3000);
 	CheckOpenGLError("Line generate");
 	lineTech.Prepare(lineStrip, {2.0f/2,0.6f/2,0.06f/2,1.0f/2,2.5f/2});
-	CheckOpenGLError("Line pre end");
+	CheckOpenGLError("Line pre end");*/
 	mouse.Init(camera);
 	fps.Init();
 	
@@ -92,8 +125,11 @@ int main(int argc, char ** argv)
 	light.data.dl.color = WHITE;
 	light.data.dl.direct = glm::normalize(glm::vec3(1.0f,0.5f,0.2f));
 	light.data.dl.intensity = 0.6f;
-	//memset(&(light.data), 255, sizeof(light.data));
+	
 	light.Init(lineTech.GetProgram());
+
+	std::thread th(getParams);
+	th.detach();
 	glutMainLoop();
 	return 0;
 }

@@ -43,9 +43,9 @@ Input::MouseControl::MouseControl()
 {
 	camera = nullptr;
 	lastX = lastY = 0;
-	xChangePosSpeed = yChangePosSpeed = 0.6f;
+	xChangePosSpeed = yChangePosSpeed = 0.06f;
 	xChangeRotateSpeed = yChangeRotateSpeed = 0.014f;
-	zChangePosSpeed = 0.8f;
+	zChangePosSpeed = 0.08f;
 }
 
 Input::MouseControl::~MouseControl()

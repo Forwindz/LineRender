@@ -28,6 +28,19 @@ namespace Tool
 		memcpy(&temp, &src, sizeof(src_type));
 		return temp;
 	}
+	/*
+	float: 0.0~1.0 >>> 2^24
+	(fixed point float 24bits for decimal part, 8bits for integer part)
+	*/
+	inline unsigned int floatToUint(const float v)
+	{
+		return (unsigned int)(v*(unsigned int)0x00FFFFFF);
+	}
+
+	inline float uintToFloat(const unsigned int v)
+	{
+		return (float)((float)v / (float)((unsigned int)0x00FFFFFF));
+	}
 
 //#define indirect_invoke(dst_type,src_obj,src_fun)\
 
