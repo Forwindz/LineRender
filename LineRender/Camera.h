@@ -23,18 +23,31 @@ namespace Render
 		glm::mat4x4 wvpMat, worldMat, viewMat, projectionMat;
 		//距离上次更新延时多久以后才算更新完毕（避免用户一直拖啊拖）
 		int updateAvaliableTime;
+		//中心点，可以设置围绕中心点旋转
+		glm::vec3 centerPos;
 		//更新uniform的data
 		void UpdateData();
 		void Init(GLuint ShaderProgram);
 		void Recomp();
 		//移动摄像机，移动方向以当前视觉方向为参考
 		void Move(const glm::vec3 t);
-		bool HasUpdated() const;
+		bool isUpdating() const;
 		void notifyUpdated();
 	private:
 		GLuint wvpMatLoc;
 		GLuint worldMatLoc;
 		int hasUpdate;
+	};
+
+	class CenterCameraControl
+	{
+	public:
+		CenterCameraControl(Camera& camera);
+		glm::vec3 centerPos;
+		void RotateAround(const float verticalDeg, const float horizonDeg);
+		void MoveDistance(const float moveDistance);
+	private:
+		Camera& camera;
 	};
 	
 

@@ -17,10 +17,18 @@ namespace Render
 		glm::vec3 direct;
 	};
 
+	struct SpecularLight
+	{
+		glm::vec3 eyePos;
+		float intensity;
+		float power;
+	};
+
 	struct LightData
 	{
 		AmbientLight al;
 		DirectionLight dl;
+		SpecularLight sl;
 	};
 
 	class LightComponent
@@ -30,7 +38,7 @@ namespace Render
 		void UpdateData();
 		LightData data;
 	private:
-		const static int NumName = 5;
+		const static int NumName = 8;
 		GLuint pos[NumName];
 	};
 }

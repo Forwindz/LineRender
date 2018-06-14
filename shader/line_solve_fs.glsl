@@ -23,12 +23,13 @@ layout(binding = 5, r32ui) uniform uimageBuffer alphaList;
 layout(location = 0) out vec4 color;
 
 // This is the maximum number of overlapping fragments allowed
-#define MAX_FRAGMENTS 15
+#define MAX_FRAGMENTS 24
 
 // Temporary array used for sorting fragments
 uvec4 fragment_list[MAX_FRAGMENTS];
 float frag_gs[MAX_FRAGMENTS];
 int frag_id[MAX_FRAGMENTS];
+int frag_line_id[MAX_FRAGMENTS];
 
 void main(void)
 {
@@ -58,8 +59,8 @@ void main(void)
 				uvec4 fragment1 = fragment_list[i];
 				uvec4 fragment2 = fragment_list[j];
 
-				float depth1 = unpackUnorm2x16(fragment1.z).x;
-				float depth2 = unpackUnorm2x16(fragment2.z).x;
+				float depth1 = uintBitsToFloat(fragment1.z);
+				float depth2 = uintBitsToFloat(fragment2.z);
 
 				if (depth1 < depth2)
 				{
@@ -70,15 +71,23 @@ void main(void)
 		}
 
 	}
+	//compute color and g value at the same time
+	vec4 final_color=vec4(1.0f);
 	
 	float gsum=0;
 	for(i = 0; i < fragment_count; i++)
 	{
+		//compute color
+		vec4 modulator = unpackUnorm4x8(fragment_list[i].y);
+		final_color = mix(final_color, modulator, modulator.w);//alpha
+		
 		//(l_id<<22)|s_id     10+22 bit
 		//llll llll llss ssss ssss ssss ssss ssss
-		frag_id[i]=int(fragment_list[i].w&(0x003FFFFF));
+		frag_id[i]=int(fragment_list[i].w&0x003FFFFF);
+		frag_line_id[i]=int(fragment_list[i].w&0xFFC00000)>>22;
 		frag_gs[i]=(imageLoad(gs,frag_id[i]).x);
 		gsum+=frag_gs[i]*frag_gs[i];
+		
 	}
 	
 	float gfront_sum=0;
@@ -92,13 +101,6 @@ void main(void)
 		imageAtomicMin(alphaList,frag_id[i],floatBitsToUint(alphaData.x));
 		gfront_sum+=frag_gs[i]*frag_gs[i];
 	}
-	//compute color
-	vec4 final_color;
-	//final color
-	for (int i = 0; i < fragment_count; i++)
-	{
-		vec4 modulator = unpackUnorm4x8(fragment_list[i].y);
-		final_color = mix(final_color, modulator, unpackUnorm2x16(fragment_list[i].z).y);//alpha
-	}
+
 	color=final_color;
 }

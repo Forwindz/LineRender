@@ -43,6 +43,7 @@ bool Render::LineTech::Init()
 	wvpMatLoc = glGetUniformLocation(program, "gWVP");
 	worldMatLoc = glGetUniformLocation(program, "gWorld");
 	sLoc = glGetUniformLocation(programCompute, "s");
+	textLoc = glGetUniformLocation(program,"gColorMap");
 	pu.Init(programSolve);
 
 	//OIT realize:
@@ -119,6 +120,8 @@ void Render::LineTech::Render(Shape::LineStrip & line, Camera& camera, LightComp
 	sqr_g.Bind(2, GL_READ_ONLY);
 	alpha.Bind(4);
 	alphai.Bind(5);
+	text.Bind(GL_TEXTURE6);
+	//glUniform1i(textLoc, 6);
 	//begin to render >>>
 	glUseProgram(program);
 	//bind uniform data
@@ -128,7 +131,7 @@ void Render::LineTech::Render(Shape::LineStrip & line, Camera& camera, LightComp
 	lc.UpdateData();
 	//second
 	line.Render();
-
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glUseProgram(programSolve);
 
 	pu.UpdateData();
@@ -142,7 +145,7 @@ void Render::LineTech::Render(Shape::LineStrip & line, Camera& camera, LightComp
 	glDispatchCompute(segNum /32 , 1,1);
 }
 
-void Render::LineTech::Prepare(Shape::LineStrip & line, Render::Param pfe,float s)
+void Render::LineTech::Prepare(Texture& texture,Shape::LineStrip & line, Render::Param pfe,float s)
 {
 	segNum = line.segNum;
 	sqr_g.InitData(GL_R32F, segNum * sizeof(float), GL_STATIC_DRAW);
@@ -153,6 +156,9 @@ void Render::LineTech::Prepare(Shape::LineStrip & line, Render::Param pfe,float 
 
 	pu.data = pfe;
 	this->s = s;
+	text = texture;
+
+	
 }
 
 void Render::LineTech::setParams(const float p, const float q, const float r, const float l, const float s)

@@ -1,18 +1,21 @@
 #include "Light.h"
 
-const static int NumName = 5;
+const static int NumName = 8;
 static const char* names[NumName] =
 {
 	"lights.al.color",
 	"lights.al.intensity",
 	"lights.dl.color",
 	"lights.dl.intensity",
-	"lights.dl.direct"
+	"lights.dl.direct",
+	"lights.sl.eyePos",
+	"lights.sl.intensity",
+	"lights.sl.power"
 };
 
 static const int fcounts[NumName] =
 {
-	3,1,3,1,3
+	3,1,3,1,3,3,1,1
 };
 
 

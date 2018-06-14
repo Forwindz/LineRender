@@ -32,4 +32,16 @@ namespace Input
 		bool hasOperate;
 		int lastX, lastY;
 	};
+
+	class KeyboardControl
+	{
+	public:
+		KeyboardControl();
+		~KeyboardControl();
+		void Init(Render::CenterCameraControl* ccc);
+		void InputTrans(const float ver, const float hor);
+		float verSpeed, horSpeed;
+	private:
+		Render::CenterCameraControl* ccc;
+	};
 }

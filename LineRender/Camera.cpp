@@ -78,7 +78,7 @@ void Render::Camera::Move(const glm::vec3 t)
 	hasUpdate = true;
 }
 
-bool Render::Camera::HasUpdated() const
+bool Render::Camera::isUpdating() const
 {
 	return hasUpdate<updateAvaliableTime;
 }
@@ -86,4 +86,28 @@ bool Render::Camera::HasUpdated() const
 void Render::Camera::notifyUpdated()
 {
 	hasUpdate = 0;
+}
+
+Render::CenterCameraControl::CenterCameraControl(Camera & _camera):camera(_camera)
+{
+	centerPos = camera.pos;
+}
+
+void Render::CenterCameraControl::RotateAround(const float verticalDeg, const float horizonalDeg)
+{
+	const glm::vec3 verAxis = glm::normalize(glm::vec3(-centerPos.z, 0, centerPos.x));
+	const glm::vec3 horAxis(0.0f, 1.0f, 0.0f);
+	glm::vec3 centerToCamera = centerPos - camera.pos;
+	RotateVector(centerToCamera, verticalDeg, verAxis);
+	RotateVector(centerToCamera, horizonalDeg, horAxis);
+	camera.pos = centerPos - centerToCamera;
+	camera.horizontalDeg += horizonalDeg;
+	camera.verticalDeg -= verticalDeg;
+}
+
+void Render::CenterCameraControl::MoveDistance(const float moveDistance)
+{
+	glm::vec3 centerToCamera = centerPos - camera.pos;
+	float length = glm::length(centerToCamera) + moveDistance;
+	camera.pos = centerPos - glm::normalize(centerToCamera)*length;
 }

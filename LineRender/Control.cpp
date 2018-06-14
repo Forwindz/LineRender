@@ -113,3 +113,52 @@ bool Input::MouseControl::hasOperated()
 	hasOperate = false;
 	return temp;
 }
+//======================================
+//keyboard
+//======================================
+
+Input::KeyboardControl* kbc = nullptr;
+
+void processNormalKeys(unsigned char key, int x, int y)
+{
+	if (kbc == nullptr)return;
+	switch (key)
+	{
+	case 'w':
+		kbc->InputTrans(1, 0);
+		break;
+	case 's':
+		kbc->InputTrans(-1, 0);
+		break;
+	case 'a':
+		kbc->InputTrans(0, 1);
+		break;
+	case 'd':
+		kbc->InputTrans(0, -1);
+		break;
+	}
+}
+
+Input::KeyboardControl::KeyboardControl()
+{
+
+}
+
+Input::KeyboardControl::~KeyboardControl()
+{
+	kbc = nullptr;
+}
+
+void Input::KeyboardControl::Init(Render::CenterCameraControl* ccc)
+{
+	this->ccc = ccc;
+	horSpeed = 1.0f;
+	verSpeed = 1.0f;
+	kbc = this;
+	glutKeyboardFunc(processNormalKeys);
+}
+
+void Input::KeyboardControl::InputTrans(const float ver, const float hor)
+{
+	ccc->RotateAround(ver*verSpeed, hor*horSpeed);
+}

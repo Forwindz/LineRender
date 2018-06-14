@@ -8,6 +8,7 @@
 #include "SimpleTools.h"
 #include "Params.h"
 #include "Clear1DTexture.h"
+#include "Texture.h"
 
 namespace Render
 {
@@ -22,7 +23,7 @@ namespace Render
 		virtual bool Init();
 		virtual bool Update();
 		void Render(Shape::LineStrip& line, Camera& camera, LightComponent& lc);
-		void Prepare(Shape::LineStrip& line, Render::Param pfe,float s);
+		void Prepare(Texture& texture,Shape::LineStrip& line, Render::Param pfe,float s);
 		void setParams(const float p, const float q, const float r, const float l, const float s);
 	protected:
 		void DrawUseLess();
@@ -31,12 +32,13 @@ namespace Render
 			headClearBuffer,
 			programSolve,programCompute,
 			uselessVBO, uselessIBO,
-			wvpMatLoc, worldMatLoc,sLoc;
+			wvpMatLoc, worldMatLoc,sLoc,textLoc;
 		ListTexture sqr_g, alpha,alphai, linkedList;
 		//Clear1DTexture clr_for_alphai;
 		Render::ParamUniform pu;
 		int segNum = 0;
 		float s = 0.0f;
 		unsigned int* initPtr = nullptr;
+		Texture text;
 	};
 }
