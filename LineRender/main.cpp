@@ -59,12 +59,28 @@ static void getParams()
 			light.data.sl.intensity = regular(its);
 			light.data.sl.power = power;
 		}
+		else if (cmd == "w")
+		{
+			std::cout << "line width:[width]\n";
+			float width = 0.1f;
+			std::cin >> width;
+			lineTech.setWidth(width);
+		}
 		else if (cmd == "q")
 		{
 			std::cout << "quit\n";
 			exit(0);
 		}
-		
+		else if (cmd == "fade")
+		{
+			std::cout << "fade param[s,it,fade_spd]\n";
+			float s, it, fs;
+			std::cin >> s >> it >> fs;
+			lineTech.u_fade.data.fade_speed = fs;
+			lineTech.u_fade.data.it_times = it;
+			lineTech.u_fade.data.s = s;
+		}
+
 		std::cout << ("-------\n");
 	}
 }
@@ -115,7 +131,7 @@ static void PrepareData()
 	std::cout << "Ready to load " << filePath << "\nInput total segments: ";
 	int sn=-1;
 	while (sn <= 0)std::cin >> sn;
-	lineStrip.LoadFromFile(filePath, sn, 0.11f);
+	lineStrip.LoadFromFile(filePath, 10000, 0.11f);
 	std::cout << "data generated.\n";
 	
 	lineTech.Prepare(text, lineStrip, { 1.0f ,60 ,80 ,1 }, 10.0f);
@@ -136,15 +152,19 @@ static void InitAll()
 	fps.Init();
 
 	light.data.al.color = WHITE;
-	light.data.al.intensity = 0.2f;
+	light.data.al.intensity = 0.5f;
 	light.data.dl.color = WHITE;
 	light.data.dl.direct = glm::normalize(glm::vec3(10.0f, 1.0f, 0.0f));
-	light.data.dl.intensity = 0.9f;
+	light.data.dl.intensity = 0.7f;
 
 	light.data.sl.intensity = 0.6f;
 	light.data.sl.power = 20;
 
 	light.Init(lineTech.GetProgram());
+
+	lineTech.u_fade.data.fade_speed = 0.1f;
+	lineTech.u_fade.data.it_times = 1.5f;
+	lineTech.u_fade.data.s = 1.0f;
 
 	std::thread th(getParams);
 	th.detach();
@@ -178,6 +198,7 @@ int main(int argc, char ** argv)
 
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glDisable(GL_PRIMITIVE_RESTART);
+	glEnable(GL_MULTISAMPLE);
 
 #ifndef _OPENMP
 	fprintf(stderr, "OpenMP not supported");

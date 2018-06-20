@@ -9,7 +9,28 @@ static const GLfloat uselessVertices[] =
 };
 static const unsigned int uselessIndices[] =
 { 0,1,2,3 };
+
+int Render::UniformStruct<Render::FadeParam>::numCount;
+const std::string * Render::UniformStruct<Render::FadeParam>::names;
+const int* Render::UniformStruct<Render::FadeParam>::fcounts;
+
+Render::LineTech::LineTech()
+{
+	static const int fadeSize[] = { 1,1,1 };
+	static const std::string fadeNames[] = { "fp.s","fp.it_times","fp.fade_speed" };
+	UniformStruct<FadeParam>::numCount = 3;
+	UniformStruct<FadeParam>::fcounts = fadeSize;
+	UniformStruct<FadeParam>::names = fadeNames;
+}
+
 Render::LineTech::~LineTech()
+{
+	Release();
+
+}
+
+
+void Render::LineTech::Release()
 {
 	glDeleteTextures(1, &headTexture);
 
@@ -22,7 +43,6 @@ Render::LineTech::~LineTech()
 	glDeleteProgram(programCompute);
 
 	if (initPtr != nullptr) delete[] initPtr;
-
 }
 
 bool Render::LineTech::Init()
@@ -42,10 +62,11 @@ bool Render::LineTech::Init()
 
 	wvpMatLoc = glGetUniformLocation(program, "gWVP");
 	worldMatLoc = glGetUniformLocation(program, "gWorld");
-	sLoc = glGetUniformLocation(programCompute, "s");
 	textLoc = glGetUniformLocation(program,"gColorMap");
+	vecLoc = glGetUniformLocation(program, "viewVec");
+	widthLoc = glGetUniformLocation(program, "width");
 	pu.Init(programSolve);
-
+	u_fade.Init(programCompute);
 	//OIT realize:
 	//Linked List head Texture:
 	glActiveTexture(GL_TEXTURE0);
@@ -120,6 +141,7 @@ void Render::LineTech::Render(Shape::LineStrip & line, Camera& camera, LightComp
 	sqr_g.Bind(2, GL_READ_ONLY);
 	alpha.Bind(4);
 	alphai.Bind(5);
+	
 	text.Bind(GL_TEXTURE6);
 	//glUniform1i(textLoc, 6);
 	//begin to render >>>
@@ -127,21 +149,26 @@ void Render::LineTech::Render(Shape::LineStrip & line, Camera& camera, LightComp
 	//bind uniform data
 	glUniformMatrix4fv(wvpMatLoc, 1, GL_TRUE, (const GLfloat*)(&(camera.wvpMat)));
 	glUniformMatrix4fv(worldMatLoc, 1, GL_TRUE, (const GLfloat*)(&(camera.worldMat)));
-	
+	camera.viewVec = glm::normalize(camera.viewVec);
+	glUniform3f(vecLoc,camera.viewVec.x, camera.viewVec.y, camera.viewVec.z);
+	glUniform1f(widthLoc, width);
+
 	lc.UpdateData();
-	//second
+	//first pass
 	line.Render();
 	glBindTexture(GL_TEXTURE_2D, 0);
+	//if (programSolve > 0)return;
 	glUseProgram(programSolve);
 
 	pu.UpdateData();
+	//second pass
 	DrawUseLess();
 	//compute shader
 	glUseProgram(programCompute);
-	glUniform1f(sLoc, s);
+	u_fade.UpdateData();
 	alpha.Bind(4);
 	alphai.Bind(5);
-
+	alphaTarget.Bind(7);
 	glDispatchCompute(segNum /32 , 1,1);
 }
 
@@ -153,12 +180,19 @@ void Render::LineTech::Prepare(Texture& texture,Shape::LineStrip & line, Render:
 
 	alpha.InitData(GL_R32F, segNum * sizeof(float), GL_DYNAMIC_COPY);
 	alphai.InitData(GL_R32UI, segNum * sizeof(int), GL_DYNAMIC_COPY);
+	alphaTarget.InitData(GL_R32F, segNum * sizeof(float), GL_DYNAMIC_COPY);
+
+	float* a;
+	a = new float[segNum];
+	memset(a, 0, sizeof(float)*segNum);
+	alphaTarget.SetData(a);
+	delete[] a;
 
 	pu.data = pfe;
 	this->s = s;
 	text = texture;
 
-	
+	width = line.width;
 }
 
 void Render::LineTech::setParams(const float p, const float q, const float r, const float l, const float s)
@@ -169,6 +203,12 @@ void Render::LineTech::setParams(const float p, const float q, const float r, co
 	pu.data.r = r;
 	this->s = s;
 }
+
+void Render::LineTech::setWidth(const float _width)
+{
+	width = _width;
+}
+
 
 void Render::LineTech::DrawUseLess()
 {

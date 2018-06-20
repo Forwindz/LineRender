@@ -43,25 +43,29 @@ in flat int s_id;
 in float alpha;
 in vec3 worldPos;
 in vec2 texCoord;
+in vec3 border;
 
 void main(void)
 {
 	vec4 modulator;
 	vec3 totalColor;
+	float px=0.5f-texCoord.x;
+	vec3 realNVec = normalize(px*border+sqrt(1-px*px)*normalVec);
 	//lights compute
 	vec3 surface_color=texture(gColorMap, texCoord.xy).xyz;
 	totalColor=surface_color*lights.al.intensity*lights.al.color;
-	vec3 dColor=surface_color*lights.dl.intensity*lights.dl.color*(dot(lights.dl.direct,normalVec));
+	vec3 dColor=surface_color*lights.dl.intensity*lights.dl.color*
+				(dot(lights.dl.direct,realNVec));
 	totalColor+=clamp(dColor,0,1);
 	vec3 VertexToEye = normalize(worldPos-lights.sl.eyePos);
-    vec3 LightReflect = normalize(reflect(lights.dl.direct, normalVec));
+    vec3 LightReflect = normalize(reflect(lights.dl.direct, realNVec));
     float SpecularFactor = dot(VertexToEye, LightReflect);
     if (SpecularFactor > 0) {
         SpecularFactor = pow(SpecularFactor, lights.sl.power);
         totalColor+= vec3(lights.dl.color * lights.sl.intensity * SpecularFactor);
     }
 	modulator=vec4(clamp(totalColor,0,1),alpha);
-	
+	//modulator=vec4(1.0f,0.2f,0.5f,1.0f)
 	//light compute finish
 	
 	uint index;

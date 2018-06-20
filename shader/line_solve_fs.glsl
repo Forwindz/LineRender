@@ -80,6 +80,7 @@ void main(void)
 		//compute color
 		vec4 modulator = unpackUnorm4x8(fragment_list[i].y);
 		final_color = mix(final_color, modulator, modulator.w);//alpha
+		//final_color=vec4(frag_gs[i]);
 		
 		//(l_id<<22)|s_id     10+22 bit
 		//llll llll llss ssss ssss ssss ssss ssss
@@ -88,6 +89,9 @@ void main(void)
 		frag_gs[i]=(imageLoad(gs,frag_id[i]).x);
 		gsum+=frag_gs[i]*frag_gs[i];
 		
+
+		//final_color=vec4(1.0f,1.0f-frag_gs[i],1.0f,1.0f); //g test
+		//final_color=vec4(1.0f,1.0f-modulator.w,1.0f,1.0f);//alpha test
 	}
 	
 	float gfront_sum=0;

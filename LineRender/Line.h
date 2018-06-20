@@ -18,21 +18,24 @@ namespace Shape
 	class LineStrip
 	{
 	public:
+		~LineStrip();
 		void LoadFromFile(const std::string& path,const int segNum, float width = 0.1f, 
 			glm::vec3 beginDir = glm::vec3(1.0f, 0.0f, 0.0f));
-		void Init(const std::vector<Line*> _line, float width, glm::vec3 _beginDir, int totalSeg);
+		void Init(const std::vector<Line*> _line, const std::vector<float> gg,
+			float width, int totalSeg);
 		void BindData(unsigned int lineDataSize,void* lineData,
 					unsigned int indicesSize,void* indicesData);
 		void Render();
 		int GetSize()const;
 		std::vector<float> g;//importance for each segment
 		int segNum;
+		float width;
 		glm::vec3 min, max;
 	protected:
 		void reformLine(std::vector<Line*>& l, std::vector<float>& gg, const int newSeg);
 		void updateMinMax(glm::vec3 pos);
-		GLuint lineData;
-		GLuint indicesData;
+		GLuint lineData=-1;
+		GLuint indicesData=-1;
 		int size;//the number of segments
 		int indiceSize;
 		bool breakLine;
