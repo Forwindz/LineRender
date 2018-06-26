@@ -23,7 +23,7 @@ layout(binding = 5, r32ui) uniform uimageBuffer alphaList;
 layout(location = 0) out vec4 color;
 
 // This is the maximum number of overlapping fragments allowed
-#define MAX_FRAGMENTS 24
+#define MAX_FRAGMENTS 30
 
 // Temporary array used for sorting fragments
 uvec4 fragment_list[MAX_FRAGMENTS];

@@ -94,7 +94,7 @@ bool Render::LineTech::Init()
 	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, atomCounterBuffer);
 	glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), NULL, GL_DYNAMIC_COPY);
 	// Create the linked list storage buffer
-	linkedList.InitData(GL_RGBA32UI, MAX_FRAMEBUFFER_WIDTH * MAX_FRAMEBUFFER_HEIGHT * 3 * sizeof(glm::vec4), GL_DYNAMIC_COPY);
+	linkedList.InitData(GL_RGBA32UI, MAX_FRAMEBUFFER_WIDTH * MAX_FRAMEBUFFER_HEIGHT * 8 * sizeof(glm::vec4), GL_DYNAMIC_COPY);
 	//useless Vertices&Indices
 	glGenBuffers(1, &uselessVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, uselessVBO);

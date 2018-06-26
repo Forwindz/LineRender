@@ -53,10 +53,13 @@ void main(void)
 	vec3 realNVec = normalize(px*border+sqrt(1-px*px)*normalVec);
 	//lights compute
 	vec3 surface_color=texture(gColorMap, texCoord.xy).xyz;
+	//ambient
 	totalColor=surface_color*lights.al.intensity*lights.al.color;
+	//direct light
 	vec3 dColor=surface_color*lights.dl.intensity*lights.dl.color*
 				(dot(lights.dl.direct,realNVec));
 	totalColor+=clamp(dColor,0,1);
+	//specular light
 	vec3 VertexToEye = normalize(worldPos-lights.sl.eyePos);
     vec3 LightReflect = normalize(reflect(lights.dl.direct, realNVec));
     float SpecularFactor = dot(VertexToEye, LightReflect);

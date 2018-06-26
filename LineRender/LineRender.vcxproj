@@ -124,6 +124,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Clear1DTexture.h" />
     <ClInclude Include="Control.h" />
+    <ClInclude Include="MSAATexture.h" />
     <ClInclude Include="UniformStruct.h" />
     <ClInclude Include="FileTools.h" />
     <ClInclude Include="hugeVector.h" />
@@ -140,7 +141,6 @@
     <ClInclude Include="ThreadTools.h" />
     <ClInclude Include="TimeTool.h" />
     <ClInclude Include="TransMatrix.h" />
-    <ClInclude Include="UniformManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />

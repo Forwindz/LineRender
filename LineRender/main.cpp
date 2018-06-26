@@ -199,6 +199,7 @@ int main(int argc, char ** argv)
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glDisable(GL_PRIMITIVE_RESTART);
 	glEnable(GL_MULTISAMPLE);
+	//glEnable(GL_LINE_SMOOTH);
 
 #ifndef _OPENMP
 	fprintf(stderr, "OpenMP not supported");

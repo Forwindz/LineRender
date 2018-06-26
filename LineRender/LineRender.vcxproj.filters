@@ -72,13 +72,13 @@
     <ClInclude Include="Clear1DTexture.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="UniformManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="UniformStruct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MSAATexture.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
