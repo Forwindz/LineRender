@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{3C66AD48-37F8-41F6-ADF3-96F79F0D04C8}</ProjectGuid>
     <RootNamespace>LineRender</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -75,6 +75,10 @@
     <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
     <IntDir>$(Configuration)</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(SolutionDir)depend\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)depend\lib\d;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -124,14 +128,12 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Clear1DTexture.h" />
     <ClInclude Include="Control.h" />
-    <ClInclude Include="MSAATexture.h" />
     <ClInclude Include="UniformStruct.h" />
     <ClInclude Include="FileTools.h" />
     <ClInclude Include="hugeVector.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="ListTexture.h" />
-    <ClInclude Include="Params.h" />
     <ClInclude Include="PreCompile.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SimpleTools.h" />
@@ -153,7 +155,6 @@
     <ClCompile Include="LineStripTech.h" />
     <ClCompile Include="ListTexture.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Params.cpp" />
     <ClCompile Include="PreCompile.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Tech.cpp" />
